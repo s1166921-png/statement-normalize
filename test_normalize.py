@@ -27,6 +27,14 @@ class Tests(unittest.TestCase):
         self.assertEqual(self.parse(row)[0][0]['settlement_id'], '')
         self.assertEqual(self.parse(row, trusted=True)[0][0]['settlement_id'], 'SETTLEMENT-B')
 
+    def test_long_identifiers_survive_as_text(self):
+        provider = '00012345678901234567'
+        settlement = '00098765432109876543'
+        receipts, audit = self.parse(
+            f'2026-11-30,EUR,12,credit,{provider},{settlement}\n', trusted=True)
+        self.assertEqual(receipts[0]['settlement_id'], settlement)
+        self.assertEqual(audit['rows'][0]['provider_id'], provider)
+
     def test_flat_and_compact_do_not_double_count_fee(self):
         flat = self.parse('2026-11-30,EUR,100,credit,P,\n2026-11-30,EUR,-3,fee,P,\n')
         compact = self.parse('2026-11-30,EUR,97,credit,P,\n')
